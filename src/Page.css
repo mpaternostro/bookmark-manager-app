@@ -1,7 +1,7 @@
 main {
   margin: 5vh auto;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: calc(100vh - 10vh);
   max-width: 600px;
 }
 

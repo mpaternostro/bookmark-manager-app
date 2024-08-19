@@ -3,15 +3,19 @@ import { toast } from "sonner";
 import {
   Dialog,
   DialogTrigger,
+  GridList,
+  GridListItem,
   Heading,
-  ListBox,
-  ListBoxItem,
+  Menu,
+  MenuItem,
+  MenuTrigger,
   Modal,
   ModalOverlay,
   OverlayTriggerStateContext,
+  Popover,
 } from "react-aria-components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addBookmark, getBookmarks } from "./api/bookmarks";
+import { addBookmark, deleteBookmark, getBookmarks } from "./api/bookmarks";
 import { Button } from "./ui/Button/Button";
 import { TextField } from "./ui/TextField/TextField";
 import "./Bookmarks.css";
@@ -32,15 +36,24 @@ export function Bookmarks() {
 
   return (
     <section>
-      <ListBox aria-label="Bookmark list" selectionMode="none" items={data}>
+      <GridList
+        aria-label="Bookmark List"
+        selectionMode="none"
+        items={data}
+        renderEmptyState={() => "No results found."}
+      >
         {(item) => (
-          <ListBoxItem textValue={item.title}>
-            <a href={item.url} target="_blank" rel="noopener noreferrer">
-              {item.title}
-            </a>
-          </ListBoxItem>
+          <GridListItem
+            textValue={item.title}
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {item.title}
+            <ItemMenu id={item.id} />
+          </GridListItem>
         )}
-      </ListBox>
+      </GridList>
       <DialogTrigger>
         <Button>Add Bookmark</Button>
         <ModalOverlay>
@@ -62,6 +75,40 @@ export function Bookmarks() {
         </ModalOverlay>
       </DialogTrigger>
     </section>
+  );
+}
+
+function ItemMenu({ id }: { id: number }) {
+  const queryClient = useQueryClient();
+  const { mutateAsync: deleteBookmarkMutate } = useMutation({
+    mutationFn: deleteBookmark,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      toast.success("Bookmark deleted");
+    },
+    onError: (error) => {
+      toast.error("Failed to delete bookmark", {
+        description: error.message,
+      });
+    },
+  });
+
+  return (
+    <MenuTrigger>
+      <Button aria-label="Menu">☰</Button>
+      <Popover>
+        <Menu>
+          <MenuItem onAction={() => alert("open")}>Edit</MenuItem>
+          <MenuItem
+            onAction={async () => {
+              await deleteBookmarkMutate(id);
+            }}
+          >
+            Delete
+          </MenuItem>
+        </Menu>
+      </Popover>
+    </MenuTrigger>
   );
 }
 

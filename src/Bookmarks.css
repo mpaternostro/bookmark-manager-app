@@ -1,3 +1,123 @@
 form[name="add-bookmark-form"] .react-aria-TextField {
   width: 100%;
 }
+
+/* Menu */
+
+.react-aria-Menu {
+  max-height: inherit;
+  box-sizing: border-box;
+  overflow: auto;
+  padding: 2px;
+  min-width: 150px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.react-aria-MenuItem {
+  margin: 2px;
+  padding: 0.286rem 0.571rem;
+  border-radius: 6px;
+  outline: none;
+  cursor: default;
+  color: var(--text-color);
+  font-size: 1.072rem;
+  position: relative;
+  display: grid;
+  grid-template-areas:
+    "label kbd"
+    "desc  kbd";
+  align-items: center;
+  column-gap: 20px;
+  forced-color-adjust: none;
+
+  &[data-focused] {
+    background: var(--highlight-background);
+    color: var(--highlight-foreground);
+  }
+}
+
+/* Popover */
+
+.react-aria-Popover {
+  --background-color: var(--overlay-background);
+
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 20px rgba(0 0 0 / 0.1);
+  border-radius: 6px;
+  background: var(--background-color);
+  color: var(--text-color);
+  outline: none;
+  max-width: 250px;
+
+  .react-aria-OverlayArrow svg {
+    display: block;
+    fill: var(--background-color);
+    stroke: var(--border-color);
+    stroke-width: 1px;
+  }
+
+  &[data-placement="top"] {
+    --origin: translateY(8px);
+
+    &:has(.react-aria-OverlayArrow) {
+      margin-bottom: 6px;
+    }
+  }
+
+  &[data-placement="bottom"] {
+    --origin: translateY(-8px);
+
+    &:has(.react-aria-OverlayArrow) {
+      margin-top: 6px;
+    }
+
+    .react-aria-OverlayArrow svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  &[data-placement="right"] {
+    --origin: translateX(-8px);
+
+    &:has(.react-aria-OverlayArrow) {
+      margin-left: 6px;
+    }
+
+    .react-aria-OverlayArrow svg {
+      transform: rotate(90deg);
+    }
+  }
+
+  &[data-placement="left"] {
+    --origin: translateX(8px);
+
+    &:has(.react-aria-OverlayArrow) {
+      margin-right: 6px;
+    }
+
+    .react-aria-OverlayArrow svg {
+      transform: rotate(-90deg);
+    }
+  }
+
+  &[data-entering] {
+    animation: popover-slide 200ms;
+  }
+
+  &[data-exiting] {
+    animation: popover-slide 200ms reverse ease-in;
+  }
+}
+
+@keyframes popover-slide {
+  from {
+    transform: var(--origin);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

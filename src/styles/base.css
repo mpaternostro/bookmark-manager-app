@@ -1,5 +1,5 @@
 @import "./Dialog.css";
-@import "./ListBox.css";
+@import "./GridList.css";
 
 @layer base {
   *,
@@ -63,7 +63,7 @@
 
   a {
     text-decoration: none;
-    color: var(--text-color);
+    color: inherit;
     cursor: pointer;
   }
 

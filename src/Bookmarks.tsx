@@ -4,6 +4,8 @@ import {
   Dialog,
   DialogTrigger,
   Heading,
+  ListBox,
+  ListBoxItem,
   Modal,
   ModalOverlay,
   OverlayTriggerStateContext,
@@ -12,7 +14,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addBookmark, getBookmarks } from "./api/bookmarks";
 import { Button } from "./ui/Button/Button";
 import { TextField } from "./ui/TextField/TextField";
-import "./styles/Dialog.css";
 import "./Bookmarks.css";
 
 export function Bookmarks() {
@@ -30,16 +31,16 @@ export function Bookmarks() {
   }
 
   return (
-    <section className="bookmark-list">
-      <ul>
-        {data.map((bookmark) => (
-          <li key={bookmark.id}>
-            <a href={bookmark.url} target="_blank" rel="noopener noreferrer">
-              {bookmark.title}
+    <section>
+      <ListBox aria-label="Bookmark list" selectionMode="none" items={data}>
+        {(item) => (
+          <ListBoxItem textValue={item.title}>
+            <a href={item.url} target="_blank" rel="noopener noreferrer">
+              {item.title}
             </a>
-          </li>
-        ))}
-      </ul>
+          </ListBoxItem>
+        )}
+      </ListBox>
       <DialogTrigger>
         <Button>Add Bookmark</Button>
         <ModalOverlay>

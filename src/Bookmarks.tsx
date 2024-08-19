@@ -1,4 +1,5 @@
 import { useContext } from "react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogTrigger,
@@ -71,6 +72,13 @@ function AddBookmarkForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       closeDialog();
+      toast.success("Bookmark added");
+    },
+    onError: (error) => {
+      toast.error("Failed to add bookmark", {
+        // bug shown below modal overlay
+        description: error.message,
+      });
     },
   });
 

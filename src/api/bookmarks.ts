@@ -29,6 +29,27 @@ export async function addBookmark(body: {
   throw new Error(response.statusText);
 }
 
+export async function updateBookmark(body: {
+  id: number;
+  url: string;
+  title: string;
+  description: string;
+}) {
+  const { id, ...bodyWithoutId } = body;
+  const response = await fetch(`http://localhost:3000/bookmarks/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(bodyWithoutId),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+  if (response.ok) {
+    return true;
+  }
+  throw new Error(response.statusText);
+}
+
 export async function deleteBookmark(id: number) {
   const response = await fetch(`http://localhost:3000/bookmarks/${id}`, {
     method: "DELETE",

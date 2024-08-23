@@ -43,6 +43,10 @@
     &[data-focus-visible] {
       outline: 2px solid var(--focus-ring-color);
       outline-offset: -2px;
+
+      & .react-aria-Button {
+        opacity: 1;
+      }
     }
 
     &[data-hovered] {
@@ -51,6 +55,7 @@
 
       & .react-aria-Button {
         opacity: 1;
+        color: var(--highlight-foreground);
       }
     }
 

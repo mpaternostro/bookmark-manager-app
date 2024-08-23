@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -15,7 +15,13 @@ import {
   Popover,
 } from "react-aria-components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addBookmark, deleteBookmark, getBookmarks } from "./api/bookmarks";
+import {
+  addBookmark,
+  deleteBookmark,
+  getBookmarks,
+  updateBookmark,
+} from "./api/bookmarks";
+import { Bookmark } from "./types/bookmarks";
 import { Button } from "./ui/Button/Button";
 import { TextField } from "./ui/TextField/TextField";
 import "./Bookmarks.css";
@@ -25,6 +31,10 @@ export function Bookmarks() {
     queryKey: ["bookmarks"],
     queryFn: getBookmarks,
   });
+  const [editDialogOpen, setEditDialogOpen] = useState<{
+    id: number | null;
+    open: boolean;
+  }>({ id: null, open: false });
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -33,6 +43,14 @@ export function Bookmarks() {
   if (error) {
     return <div>{error.message}</div>;
   }
+
+  const handleOpenEditDialog = (id: number) => {
+    setEditDialogOpen({ id, open: true });
+  };
+
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen({ id: null, open: false });
+  };
 
   return (
     <section>
@@ -50,7 +68,10 @@ export function Bookmarks() {
             rel="noopener noreferrer"
           >
             {item.title}
-            <ItemMenu id={item.id} />
+            <ItemMenu
+              id={item.id}
+              handleOpenEditDialog={handleOpenEditDialog}
+            />
           </GridListItem>
         )}
       </GridList>
@@ -74,11 +95,39 @@ export function Bookmarks() {
           </Modal>
         </ModalOverlay>
       </DialogTrigger>
+      <DialogTrigger
+        isOpen={editDialogOpen.open}
+        onOpenChange={handleCloseEditDialog}
+      >
+        <ModalOverlay>
+          <Modal>
+            <Dialog>
+              <>
+                <div className="dialog-heading-container">
+                  <Heading slot="title">Edit Bookmark</Heading>
+                  <Button onPress={handleCloseEditDialog} aria-label="Close">
+                    ❌
+                  </Button>
+                </div>
+                <EditBookmarkForm
+                  bookmark={data.find(({ id }) => editDialogOpen.id === id)}
+                />
+              </>
+            </Dialog>
+          </Modal>
+        </ModalOverlay>
+      </DialogTrigger>
     </section>
   );
 }
 
-function ItemMenu({ id }: { id: number }) {
+function ItemMenu({
+  id,
+  handleOpenEditDialog,
+}: {
+  id: number;
+  handleOpenEditDialog: (id: number) => void;
+}) {
   const queryClient = useQueryClient();
   const { mutateAsync: deleteBookmarkMutate } = useMutation({
     mutationFn: deleteBookmark,
@@ -96,9 +145,10 @@ function ItemMenu({ id }: { id: number }) {
   return (
     <MenuTrigger>
       <Button aria-label="Menu">☰</Button>
+      {/* should have a way to open with keyboard while focused */}
       <Popover>
         <Menu>
-          <MenuItem onAction={() => alert("open")}>Edit</MenuItem>
+          <MenuItem onAction={() => handleOpenEditDialog(id)}>Edit</MenuItem>
           <MenuItem
             onAction={async () => {
               await deleteBookmarkMutate(id);
@@ -148,6 +198,53 @@ function AddBookmarkForm() {
       <TextField name="url" label="URL" />
       <TextField name="title" label="Title" />
       <TextField name="description" label="Description" />
+      <Button type="submit">Submit</Button>
+    </form>
+  );
+}
+
+function EditBookmarkForm({ bookmark }: { bookmark: Bookmark | undefined }) {
+  const { close: closeDialog } = useContext(OverlayTriggerStateContext);
+  const queryClient = useQueryClient();
+  const { mutateAsync: updateBookmarkMutate } = useMutation({
+    mutationFn: updateBookmark,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      closeDialog();
+      toast.success("Bookmark updated successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to update bookmark", {
+        // bug shown below modal overlay
+        description: error.message,
+      });
+    },
+  });
+
+  const handleUpdateBookmark: React.FormEventHandler<HTMLFormElement> = async (
+    event
+  ) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const id = parseInt(formData.get("id") as string);
+    const url = formData.get("url") as string;
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+
+    await updateBookmarkMutate({ id, url, title, description });
+  };
+
+  return (
+    <form name="add-bookmark-form" onSubmit={handleUpdateBookmark}>
+      <TextField name="id" value={bookmark?.id.toString()} type="hidden" />
+      <TextField name="url" label="URL" defaultValue={bookmark?.url} />
+      <TextField name="title" label="Title" defaultValue={bookmark?.title} />
+      <TextField
+        name="description"
+        label="Description"
+        defaultValue={bookmark?.description}
+      />
       <Button type="submit">Submit</Button>
     </form>
   );

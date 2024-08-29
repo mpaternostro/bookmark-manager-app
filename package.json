@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && cp manifest.json dist/manifest.json",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -19,6 +19,8 @@
   "devDependencies": {
     "@eslint/js": "^9.8.0",
     "@tanstack/eslint-plugin-query": "^5.51.15",
+    "@types/chrome": "^0.0.270",
+    "@types/node": "^22.5.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

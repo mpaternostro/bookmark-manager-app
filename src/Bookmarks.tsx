@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   GridList,
@@ -10,6 +10,7 @@ import {
 } from "react-aria-components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteBookmark, getBookmarks } from "./api/bookmarks";
+import { CurrentTabData } from "./types/bookmarks";
 import { Button } from "./ui/Button/Button";
 import { Dialog } from "./ui/Dialog/Dialog";
 import { AddBookmarkForm } from "./AddBookmarkForm";
@@ -26,6 +27,50 @@ export function Bookmarks() {
     id: number | null;
     open: boolean;
   }>({ id: null, open: false });
+  const [currentTabData, setCurrentTabData] = useState<CurrentTabData | null>(
+    null
+  );
+
+  const handleOpenAddDialog = () => setAddDialogOpen(true);
+  const handleCloseAddDialog = () => setAddDialogOpen(false);
+  const handleOpenEditDialog = (id: number) =>
+    setEditDialogOpen({ id, open: true });
+  const handleCloseEditDialog = () =>
+    setEditDialogOpen({ id: null, open: false });
+  const handleClearCurrentTabData = () => setCurrentTabData(null);
+
+  useEffect(() => {
+    function getTabData() {
+      return {
+        title: document.title,
+        description:
+          document
+            .querySelector("meta[name=description]")
+            ?.getAttribute("content") ?? undefined,
+        url: window.location.href,
+      };
+    }
+
+    if ("tabs" in window.chrome) {
+      chrome.tabs
+        .query({ active: true, currentWindow: true })
+        .then(async ([tab]) => {
+          if (tab?.id) {
+            const results = await chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              func: getTabData,
+            });
+            const data = results[0]?.result;
+            if (data) {
+              setCurrentTabData(data);
+              handleOpenAddDialog();
+            }
+          }
+        });
+    }
+
+    return () => {};
+  }, []);
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -34,13 +79,6 @@ export function Bookmarks() {
   if (error) {
     return <div>{error.message}</div>;
   }
-
-  const handleOpenAddDialog = () => setAddDialogOpen(true);
-  const handleCloseAddDialog = () => setAddDialogOpen(false);
-  const handleOpenEditDialog = (id: number) =>
-    setEditDialogOpen({ id, open: true });
-  const handleCloseEditDialog = () =>
-    setEditDialogOpen({ id: null, open: false });
 
   return (
     <section>
@@ -71,7 +109,11 @@ export function Bookmarks() {
         isOpen={addDialogOpen}
         onOpenChange={handleCloseAddDialog}
       >
-        <AddBookmarkForm handleCloseDialog={handleCloseAddDialog} />
+        <AddBookmarkForm
+          handleCloseDialog={handleCloseAddDialog}
+          handleClearCurrentTabData={handleClearCurrentTabData}
+          currentTabData={currentTabData}
+        />
       </Dialog>
       <Dialog
         title="Edit Bookmark"

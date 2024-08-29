@@ -1,0 +1,13 @@
+{
+  "name": "Bookmark Manager",
+  "version": "1.0.0",
+  "description": "Keep track of your bookmarks in one place from all your browsers.",
+  "manifest_version": 3,
+  "author": "Marcelo Paternostro",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Bookmark Manager"
+  },
+  "host_permissions": ["http://localhost/*"],
+  "permissions": ["activeTab", "scripting"]
+}

@@ -1,13 +1,18 @@
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addBookmark } from "./api/bookmarks";
+import { CurrentTabData } from "./types/bookmarks";
 import { Button } from "./ui/Button/Button";
 import { TextField } from "./ui/TextField/TextField";
 import "./Bookmarks.css";
 
 export function AddBookmarkForm({
+  currentTabData,
+  handleClearCurrentTabData,
   handleCloseDialog,
 }: {
+  currentTabData: CurrentTabData | null;
+  handleClearCurrentTabData: () => void;
   handleCloseDialog: () => void;
 }) {
   const queryClient = useQueryClient();
@@ -16,6 +21,7 @@ export function AddBookmarkForm({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       handleCloseDialog();
+      handleClearCurrentTabData();
       toast.success("Bookmark added");
     },
     onError: (error) => {
@@ -41,9 +47,17 @@ export function AddBookmarkForm({
 
   return (
     <form name="add-bookmark-form" onSubmit={handleAddBookmark}>
-      <TextField name="url" label="URL" />
-      <TextField name="title" label="Title" />
-      <TextField name="description" label="Description" />
+      <TextField name="url" label="URL" defaultValue={currentTabData?.url} />
+      <TextField
+        name="title"
+        label="Title"
+        defaultValue={currentTabData?.title}
+      />
+      <TextField
+        name="description"
+        label="Description"
+        defaultValue={currentTabData?.description}
+      />
       <Button type="submit">Submit</Button>
     </form>
   );

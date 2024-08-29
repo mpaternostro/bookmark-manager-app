@@ -6,3 +6,9 @@ export interface Bookmark {
   created_at: string;
   updated_at: string;
 }
+
+export interface CurrentTabData {
+  title: string;
+  url: string;
+  description?: string;
+}

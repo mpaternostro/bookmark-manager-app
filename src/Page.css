@@ -1,7 +1,8 @@
 main {
   margin: 5vh auto;
-  min-width: 320px;
-  min-height: calc(100vh - 10vh);
+  padding: 0 0.5rem;
+  min-width: 420px;
+  min-height: max(360px, calc(100vh - 10vh));
   max-width: 600px;
 }
 
@@ -16,7 +17,7 @@ main {
 }
 
 form[name="login-form"] {
-  max-width: 320px;
+  max-width: 420px;
   margin: 5vh auto;
   display: flex;
   flex-direction: column;
